@@ -1,0 +1,27 @@
+name: macOS Remote Desktop
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Installazione e configurazione Ngrok
+        env:
+          NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+        run: |
+          brew install ngrok/ngrok/ngrok
+          ngrok config add-authtoken $NGROK_AUTH_TOKEN
+
+      - name: Avvio Tunnel per Desktop Remoto
+        run: |
+          # Avvia il tunnel sulla porta VNC/RDP standard
+          ngrok tcp 5900 &
+          sleep 5
+          curl -s http://localhost:4040/api/tunnels | grep -o 'tcp://[^"]*'
+
+      - name: Mantiene la macchina attiva
+        run: |
+          echo "Mac pronto per la connessione!"
+          # Mantiene la sessione attiva per 1 ora
+          sleep 3600
